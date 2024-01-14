@@ -5,32 +5,37 @@ using System.Data;
 using Mono.Data.Sqlite;
 using System.IO;
 using UnityEngine.Networking;
+using Assets.Scripts.Persistence.DAO.Specification;
 
-public class DataBaseBuilder : MonoBehaviour
+public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
 {
-    protected SqliteConnection Connection => new SqliteConnection($"Data Source = {this.databasePath};");
-    public string DatabaseName;
+    [SerializeField]
+    protected string databaseName;
     protected string databasePath;
+    public string DatabaseName => this.databaseName;
+
+    public SqliteConnection Connection => new SqliteConnection($"Data Source = {this.databasePath};");
+
+    [SerializeField]
+    protected bool copyDatabase;
 
 
-    private void Awake()
+    protected void Awake()
     {
-        if (string.IsNullOrEmpty(this.DatabaseName))
+        print("SQLiteDataSource Awake");
+        if (string.IsNullOrEmpty(this.databaseName))
         {
             Debug.LogError("Database name is empty");
             return;
         }
-        // CreateDatabaseFileIfNotExists();
-        CopyDatabaseFileIfNotExists();
+        
         try
         {
-            // CreateTableWeapon();
-            //  CreateTableCharacter();
-            // InsertDataWeapon("Sword", 10, 25.89d);
-            InsertDataCharacter("Kaz", 2, 1, 3, 10, 1);
-            // Debug.Log(GetCharacter(1));
-            //Debug.Log("DELETE CHARACTER: " + DeleteCharacter(1));
-            Debug.Log($"UPDATE CHARACTER: " + UpdateCharacter(1,"Kaz Kazyamof", 4, 5, 6, 7, 2));
+            if (this.copyDatabase)
+                CopyDatabaseFileIfNotExists();
+            //else
+            //CreateDatabaseFileIfNotExists();
+
         }
         catch (IOException e)
         {
@@ -102,6 +107,7 @@ public class DataBaseBuilder : MonoBehaviour
 
     #endregion
 
+    /*
     protected void CreateTableCharacter()
     {
         var commandText = "CREATE TABLE Character " +
@@ -172,7 +178,8 @@ public class DataBaseBuilder : MonoBehaviour
 
     protected void InsertDataCharacter(string name, int attack, int defense, int agility, int health, int weaponId)
     {
-        var commandText = "INSERT INTO Character(Name, Attack, Defense, Agility, Health, WeaponId) " +
+        var commandText = 
+            "INSERT INTO Character(Name, Attack, Defense, Agility, Health, WeaponId) " +
             "VALUES (@name, @attack, @defense, @agility, @health, @weaponId);";
 
         using (var connection = Connection)
@@ -189,7 +196,7 @@ public class DataBaseBuilder : MonoBehaviour
                 command.Parameters.AddWithValue("@health", health);
                 command.Parameters.AddWithValue("@weaponId", weaponId);
 
-                var result = command.ExecuteNonQuery();
+                var result = command.ExecuteNonQueryWithFk();
                 Debug.Log($"INSERT CHARACTER: {result.ToString()}");
             }
         }
@@ -274,5 +281,7 @@ public class DataBaseBuilder : MonoBehaviour
             }
         }
     }
+    
+    */
 }
 
